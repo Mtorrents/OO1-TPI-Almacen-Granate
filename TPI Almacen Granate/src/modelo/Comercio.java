@@ -108,25 +108,25 @@ public class Comercio extends Actor {
 	public void setLstCarrito(List<Carrito> lstCarrito) {
 		this.lstCarrito = lstCarrito;
 	}
-	
+
 	public LocalTime traerHoraRetiro(LocalDate fecha) {
 		DiaRetiro dr1 = null;
-		for(int i=0; i<lstDiaRetiro.size(); i++) {
-			if(lstDiaRetiro.get(i).getHoraHasta().atDate(fecha) != null) {
+		for (int i = 0; i < lstDiaRetiro.size(); i++) {
+			if (lstDiaRetiro.get(i).getHoraHasta().atDate(fecha) != null) {
 				dr1 = lstDiaRetiro.get(i);
 			}
 		}
 		return dr1.getHoraHasta();
 	}
-	
+
 	public boolean agregarDiaRetiro(int diaSemana, LocalTime horaDesde, LocalTime horaHasta, int intervalo) {
 		lstDiaRetiro.add(new DiaRetiro(traerId(), diaSemana, horaDesde, horaHasta, intervalo));
 		return true;
 	}
-	
+
 	public int traerId() {
 		int idDiaRetiro = 1;
-		for(int i=0; i<lstDiaRetiro.size(); i++) {
+		for (int i = 0; i < lstDiaRetiro.size(); i++) {
 			idDiaRetiro++;
 		}
 		return idDiaRetiro;

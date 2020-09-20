@@ -45,13 +45,72 @@ public class Cliente extends Actor {
 	public void setSexo(char sexo) {
 		this.sexo = sexo;
 	}
-	
+
 	public boolean validarIdentificadorUnico(long identificador) {
-		if(identificador > 9999999 && identificador < 99999999) {
-			int aInt = (int)identificador;
+		if (identificador > 9999999 && identificador < 99999999) {
 			return true;
+		} else {
+			return false;
 		}
-		return false;
 	}
+
+	public boolean validarIdentificadorUnico1(String[] identificador) {
+		boolean esValido = true;
+		if (identificador[0] != "2") {
+			esValido = false;
+		} else {
+			if ((this.sexo == 'M' || this.sexo == 'm')) {
+				if ((identificador[1] != "0") && (identificador[1] != "3")) {
+					esValido = false;
+				}
+			}
+			if ((this.sexo == 'F' || this.sexo == 'f')) {
+				if ((identificador[1] != "7") && (identificador[1] != "3")) {
+					esValido = false;
+				}
+			}
+		}
+		int claveCuil[] = { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
+		int resultado = 0;
+		for (int i = 0; i < claveCuil.length; i++) {
+			resultado = resultado + (Integer.parseInt(identificador[i]) * claveCuil[i]);
+		}
+		resultado = resultado % 11;
+		int r = resultado;
+		int z = 0;
+		if (r == 0) {
+			z = 0;
+		}
+
+		if (r == 1) {
+			if ((this.sexo == 'M' || this.sexo == 'm')) {
+				if (identificador[1] != "3") { 
+					esValido = false;
+				} else {
+					z = 9;
+				}
+			}
+		}
+		if (r == 1) {
+			if ((this.sexo == 'F' || this.sexo == 'f')) {
+				if (identificador[1] != "3") {
+					esValido = false;
+				} else {
+					z = 4;
+				}
+			}
+		}
+		if (r != 0 && r != 1) {
+			z = 11 - r;
+
+		}
+
+		if (z != Integer.parseInt(identificador[10])) {
+			esValido = false;
+		}
+
+	return esValido;
+
+}
 
 }
