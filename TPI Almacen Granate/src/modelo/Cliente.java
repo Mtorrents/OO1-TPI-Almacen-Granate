@@ -47,15 +47,18 @@ public class Cliente extends Actor {
 	}
 
 	public boolean validarIdentificadorUnico(long identificador) {
+		boolean esDniValido = false;
 		if (identificador > 9999999 && identificador < 99999999) {
-			return true;
+			esDniValido = true;
 		} else {
-			return false;
+			esDniValido = false;
 		}
+		return esDniValido;
 	}
 
-	public boolean validarIdentificadorUnico1(String[] identificador) {
+	public boolean validarIdentificadorUnico(String[] identificador) {
 		boolean esValido = true;
+
 		if (identificador[0] != "2") {
 			esValido = false;
 		} else {
@@ -84,7 +87,7 @@ public class Cliente extends Actor {
 
 		if (r == 1) {
 			if ((this.sexo == 'M' || this.sexo == 'm')) {
-				if (identificador[1] != "3") { 
+				if (identificador[1] != "3") {
 					esValido = false;
 				} else {
 					z = 9;
@@ -109,8 +112,8 @@ public class Cliente extends Actor {
 			esValido = false;
 		}
 
-	return esValido;
+		return esValido;
 
-}
+	}
 
 }

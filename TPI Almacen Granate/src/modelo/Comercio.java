@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.Cliente;
 
 public class Comercio extends Actor {
 	private String nombreComercio;
@@ -120,16 +121,23 @@ public class Comercio extends Actor {
 	}
 
 	public boolean agregarDiaRetiro(int diaSemana, LocalTime horaDesde, LocalTime horaHasta, int intervalo) {
-		lstDiaRetiro.add(new DiaRetiro(traerId(), diaSemana, horaDesde, horaHasta, intervalo));
+		lstDiaRetiro.add(new DiaRetiro(traerIdDiaRetiro() + 1, diaSemana, horaDesde, horaHasta, intervalo));
 		return true;
 	}
 
-	public int traerId() {
-		int idDiaRetiro = 1;
-		for (int i = 0; i < lstDiaRetiro.size(); i++) {
-			idDiaRetiro++;
+	public int traerIdDiaRetiro() {
+		int mayor = 0;
+		if (lstDiaRetiro.size() != 0) {
+			mayor = lstDiaRetiro.get(0).getId();
 		}
-		return idDiaRetiro;
+		int actual;
+		for (int i = 0; i < lstDiaRetiro.size(); i++) {
+			actual = lstDiaRetiro.get(i).getId();
+			if (actual > mayor) {
+				mayor = actual;
+			}
+		}
+		return mayor;
 	}
 
 }
