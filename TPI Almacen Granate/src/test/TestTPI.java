@@ -33,11 +33,10 @@ public class TestTPI {
 		System.out.println("Traigo hora retiro: ");
 		System.out.println(comercio1.traerHoraRetiro(diaTurno1));
 		System.out.println(comercio1.traerHoraRetiro(diaTurno2));
+		System.out.println(comercio1.traerDiaRetiro(diaTurno1));
 		System.out.println("**************************");
 		System.out.println("Genero turnos libres: ");
 		System.out.println(comercio1.generarTurnosLibres(diaTurno1));
-		System.out.println(comercio1.generarTurnosLibres(diaTurno1));
-		System.out.println(comercio1.generarTurnosLibres(diaTurno2));
 		System.out.println(comercio1.generarTurnosLibres(diaTurno2));
 		System.out.println("**************************");
 		System.out.println("Traigo turnos ocupdados: ");
@@ -46,7 +45,7 @@ public class TestTPI {
 		System.out.println(comercio1.traerTurnosOcupados(diaTurno2));
 		System.out.println("**************************");
 		System.out.println("Genero la agenda de turnos: ");
-//		System.out.println(comercio1.generarAgenda(diaTurno1));
-//		System.out.println(comercio1.generarAgenda(diaTurno2));
+		System.out.println(comercio1.generarAgenda(diaTurno1));
+		System.out.println(comercio1.generarAgenda(diaTurno2));
 	}
 }

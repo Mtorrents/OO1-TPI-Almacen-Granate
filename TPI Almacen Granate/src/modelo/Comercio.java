@@ -114,17 +114,25 @@ public class Comercio extends Actor {
 
 	public LocalTime traerHoraRetiro(LocalDate fecha) {
 		LocalTime horaRetiro = null;
-		for (int i = 0; i < lstDiaRetiro.size(); i++) {
+		int i = 0;
+		boolean encontrado = false;
+		while (i < lstDiaRetiro.size() && encontrado == false) {
 			if (lstDiaRetiro.get(i).getDiaSemana() == fecha.getDayOfWeek().getValue()) {
 				horaRetiro = lstDiaRetiro.get(i).getHoraDesde();
+				encontrado = true;
 			}
+			i++;
 		}
 		return horaRetiro;
 	}
 
 	public boolean agregarDiaRetiro(int diaSemana, LocalTime horaDesde, LocalTime horaHasta, int intervalo) {
-		lstDiaRetiro.add(new DiaRetiro(traerIdDiaRetiro() + 1, diaSemana, horaDesde, horaHasta, intervalo));
-		return true;
+		if (traerDiaRetiro(diaSemana) != null) {
+			return false;
+		} else {
+			lstDiaRetiro.add(new DiaRetiro(traerIdDiaRetiro() +1, diaSemana, horaDesde, horaHasta, intervalo));
+			return true;
+		}
 	}
 
 	protected boolean validarIdentificadorUnico(long identificador) {
@@ -152,78 +160,82 @@ public class Comercio extends Actor {
 			mayor = lstDiaRetiro.get(0).getId();
 		}
 		int actual;
-		for (int i = 0; i < lstDiaRetiro.size(); i++) {
+		boolean encontrado = false;
+		int i = 0;
+		while (i < lstDiaRetiro.size() && encontrado == false) {
 			actual = lstDiaRetiro.get(i).getId();
 			if (actual > mayor) {
 				mayor = actual;
+				encontrado = true;
 			}
+			i++;
 		}
 		return mayor;
 	}
 
-//	public List<Turno> generarAgenda(LocalDate fecha) {
-//		List<Turno> lstTurnos = new ArrayList<Turno>();
-//		List<Turno> turnosLibres = new ArrayList<Turno>();
-//		List<Turno> turnosOcupados = new ArrayList<Turno>();
-//		
-//		lstTurno.add(new Turno(fecha, ));
-//	}
-
-	public List<Turno> generarTurnosLibres(LocalDate fecha) {
+	public DiaRetiro traerDiaRetiro(int diaSemana) {
 		DiaRetiro diaRetiro = null;
-		for (int i = 0; i < lstDiaRetiro.size(); i++) {
+		boolean encontrado = false;
+		int i = 0;
+		while (i < lstDiaRetiro.size() && encontrado == false) {
+			if (lstDiaRetiro.get(i).getDiaSemana() == diaSemana) {
+				diaRetiro = lstDiaRetiro.get(i);
+				encontrado = true;
+			}
+			i++;
+		}
+		return diaRetiro;
+	}
+
+	public DiaRetiro traerDiaRetiro(LocalDate fecha) {
+		DiaRetiro diaRetiro = null;
+		boolean encontrado = false;
+		int i = 0;
+		while(i < lstDiaRetiro.size() && encontrado == false) {
 			if (lstDiaRetiro.get(i).getDiaSemana() == fecha.getDayOfWeek().getValue()) {
 				diaRetiro = lstDiaRetiro.get(i);
+				encontrado = true;
 			}
+			i++;
 		}
+		return diaRetiro;
+	}
+
+
+	public List<Turno> generarTurnosLibres(LocalDate fecha) {
+		DiaRetiro diaRetiro = traerDiaRetiro(fecha);
 		List<Turno> turno = new ArrayList<Turno>();
 		if (diaRetiro != null) {
 			LocalTime horaDesde = diaRetiro.getHoraDesde();
 			LocalTime horaHasta = diaRetiro.getHoraHasta();
 			int intervalo = diaRetiro.getIntervalo();
-			for (int i = 0; i < 1; i++) {
-				if (lstDiaRetiro.get(i).getDiaSemana() == fecha.getDayOfWeek().getValue()) {
-					if (horaDesde.isBefore(horaHasta)) {
-						turno.add(new Turno(fecha, horaDesde, false));
-						horaDesde = horaDesde.plusMinutes(intervalo);
-					}
-				}
+			while (horaDesde.isBefore(horaHasta)) {
+				turno.add(new Turno(fecha, horaDesde, false));
+				horaDesde = horaDesde.plusMinutes(intervalo);
 			}
 		}
+
 		return turno;
+
 	}
 
-//	public List<Pelicula> traerPelicula(Genero genero) {
-//		List<Pelicula> p3 = new ArrayList<Pelicula>();
-//		for (int i = 0; i < catalogo.size(); i++) {
-//			if (catalogo.get(i).getGenero().equals(genero)) {
-//				p3.add(new Pelicula(catalogo.get(i).getIdPelicula(), catalogo.get(i).getPelicula(),
-//						catalogo.get(i).getGenero()));
-//			}
-//		}
-//		return p3;
-//
-//	}
-
 	public List<Turno> traerTurnosOcupados(LocalDate fecha) {
-		DiaRetiro diaRetiro = null;
-		for (int i = 0; i < lstDiaRetiro.size(); i++) {
-			if (lstDiaRetiro.get(i).getDiaSemana() == fecha.getDayOfWeek().getValue()) {
-				diaRetiro = lstDiaRetiro.get(i);
-			}
-		}
+		List<Turno> turnosLibres = generarTurnosLibres(fecha);
+		DiaRetiro diaRetiro = traerDiaRetiro(fecha);
 		List<Turno> turnosOcupados = new ArrayList<Turno>();
+		int i = 0;
 		if (diaRetiro != null) {
 			LocalTime horaDesde = diaRetiro.getHoraDesde();
 			LocalTime horaHasta = diaRetiro.getHoraHasta();
 			int intervalo = diaRetiro.getIntervalo();
-			for (int i = 0; i < lstDiaRetiro.size(); i++) {
-				if (lstDiaRetiro.get(i).getDiaSemana() == fecha.getDayOfWeek().getValue()) {
+			while(i < turnosLibres.size()) {
+				if (turnosLibres.get(i).getDia().equals(fecha)) {
 					if (horaDesde.isBefore(horaHasta)) {
 						turnosOcupados.add(new Turno(fecha, horaDesde, true));
 						horaDesde = horaDesde.plusMinutes(intervalo);
 					}
 				}
+				i++;
 			}
 		}
 		return turnosOcupados;
@@ -232,26 +244,23 @@ public class Comercio extends Actor {
 
 	public List<Turno> generarAgenda(LocalDate fecha) {
 		List<Turno> agendar = new ArrayList<Turno>();
-		DiaRetiro diaRetiro = null;
-		for (int i = 0; i < lstDiaRetiro.size(); i++) {
-			if (lstDiaRetiro.get(i).getDiaSemana() == fecha.getDayOfWeek().getValue()) {
-				diaRetiro = lstDiaRetiro.get(i);
-				List<Turno> turno = new ArrayList<Turno>();
-				if (diaRetiro != null) {
-					LocalTime horaDesde = diaRetiro.getHoraDesde();
-					LocalTime horaHasta = diaRetiro.getHoraHasta();
-					int intervalo = diaRetiro.getIntervalo();
-					for (int i = 0; i < 1; i++) {
-						if (lstDiaRetiro.get(i).getDiaSemana() == fecha.getDayOfWeek().getValue()) {
-							if (horaDesde.isBefore(horaHasta)) {
-								agendar.add(new Turno(fecha, horaDesde, true));
-								horaDesde = horaDesde.plusMinutes(intervalo);
-							}
-						}
-					}
+		List<Turno> turnosOcupados = traerTurnosOcupados(fecha);
+		DiaRetiro diaRetiro = traerDiaRetiro(fecha);
+		List<Turno> turnosLibres = generarTurnosLibres(fecha);
+		int i =0;
+		boolean turnosOcupadosEncontrados = false;
+		if (diaRetiro != null) {
+			while(i < turnosLibres.size() && turnosOcupadosEncontrados == false) {
+				if(turnosOcupados.isEmpty() == false) {
+					agendar.add(turnosOcupados.get(i));
+				} else if(turnosLibres.isEmpty() == false){
+					agendar.add(turnosLibres.get(i));
 				}
+				i++;
 			}
 		}
 		return agendar;
 	}
+	
+	
 }
