@@ -5,6 +5,8 @@ import java.time.LocalTime;
 import java.util.Arrays;
 
 import modelo.Actor;
+import modelo.Articulo;
+import modelo.Carrito;
 import modelo.Cliente;
 import modelo.Comercio;
 import modelo.Contacto;
@@ -17,14 +19,17 @@ public class TestTPI {
 		Ubicacion u1 = new Ubicacion(12.0, 13.0);
 		Contacto cn1 = new Contacto("martin.torrents35@gmail.com", "15-5988-0377", u1);
 		Cliente c1 = new Cliente(1, cn1, "Torrents", "Martin", 39642511, 'M');
-		
+		Comercio comercio1 = new Comercio(1, cn1, "Almacen Granate", 20328304334l, 24.0, 12.0, 7, 20, 30);
+
+		Carrito carrito1 = new Carrito(1, LocalDate.now(), LocalTime.now(), false, 20, c1,
+				comercio1.traerListaCarrito(1), null);
+		Articulo articulo1 = new Articulo(1, "Papa", "123456789041", 12.0);
 		LocalTime horaDesde1 = LocalTime.of(9, 00, 00);
 		LocalTime horaHasta1 = LocalTime.of(22, 00, 00);
 		LocalTime horaDesde2 = LocalTime.of(9, 30, 00);
 		LocalTime horaHasta2 = LocalTime.of(22, 00, 00);
 		LocalDate diaTurno1 = LocalDate.now();
 		LocalDate diaTurno2 = LocalDate.of(2020, 4, 26);
-		Comercio comercio1 = new Comercio(1, cn1, "Almacen Granate", 20328304334l, 24.0, 12.0, 7, 20, 30);
 		System.out.println("**************************");
 		System.out.println("Agrego dia retiro: ");
 		System.out.println(comercio1.agregarDiaRetiro(diaTurno1.getDayOfWeek().getValue(), horaDesde1, horaHasta1, 20));
@@ -33,7 +38,6 @@ public class TestTPI {
 		System.out.println("Traigo hora retiro: ");
 		System.out.println(comercio1.traerHoraRetiro(diaTurno1));
 		System.out.println(comercio1.traerHoraRetiro(diaTurno2));
-		System.out.println(comercio1.traerDiaRetiro(diaTurno1));
 		System.out.println("**************************");
 		System.out.println("Genero turnos libres: ");
 		System.out.println(comercio1.generarTurnosLibres(diaTurno1));
@@ -47,5 +51,11 @@ public class TestTPI {
 		System.out.println("Genero la agenda de turnos: ");
 		System.out.println(comercio1.generarAgenda(diaTurno1));
 		System.out.println(comercio1.generarAgenda(diaTurno2));
+		System.out.println("**************************");
+		System.out.println("Valido codigo de barras");
+		System.out.println(comercio1.validarCodBarras("123456789041"));
+		System.out.println("**************************");
+		System.out.println("Agrego articulos:");
+		System.out.println(comercio1.agregar(articulo1, 30));
 	}
 }

@@ -16,7 +16,7 @@ public class Carrito {
 	private Entrega entrega;
 
 	public Carrito(int id, LocalDate fecha, LocalTime hora, boolean cerrado, double descuento, Cliente cliente,
-			Entrega entrega) {
+			List<ItemCarrito> lstItemCarrito, Entrega entrega) {
 		super();
 		this.id = id;
 		this.fecha = fecha;
@@ -24,6 +24,7 @@ public class Carrito {
 		this.cerrado = cerrado;
 		this.descuento = descuento;
 		this.cliente = cliente;
+		this.lstItemCarrito = lstItemCarrito;
 		this.entrega = entrega;
 	}
 
@@ -90,4 +91,12 @@ public class Carrito {
 	public void setEntrega(Entrega entrega) {
 		this.entrega = entrega;
 	}
+
+	@Override
+	public String toString() {
+		return "Carrito [id=" + id + ", fecha=" + fecha + ", hora=" + hora + ", cerrado=" + cerrado + ", descuento="
+				+ descuento + ", cliente=" + cliente + ", lstItemCarrito=" + lstItemCarrito + ", entrega=" + entrega
+				+ "]";
+	}
+
 }
