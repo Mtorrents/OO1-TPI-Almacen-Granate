@@ -46,4 +46,9 @@ public class Cliente extends Actor {
 		this.sexo = sexo;
 	}
 
+	@Override
+	public String toString() {
+		return "Cliente [apellido=" + apellido + ", nombre=" + nombre + ", dni=" + dni + ", sexo=" + sexo + "]";
+	}
+
 }

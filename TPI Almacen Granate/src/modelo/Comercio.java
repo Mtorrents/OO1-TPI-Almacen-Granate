@@ -198,6 +198,34 @@ public class Comercio extends Actor {
 		return diaRetiro;
 	}
 
+	public Carrito traerCarrito(LocalDate fecha) {
+		Carrito carrito = null;
+		int i = 0;
+		while (i < lstCarrito.size()) {
+			if (lstCarrito.get(i).getFecha().equals(fecha)) {
+				carrito = lstCarrito.get(i);
+				i++;
+			}
+		}
+		return carrito;
+	}
+
+	public List<ItemCarrito> traerItemCarrito(Articulo articulo) {
+		List<ItemCarrito> item = new ArrayList<ItemCarrito>();
+		int i = 0;
+		int j = 0;
+		while (i < lstCarrito.size()) {
+			while (j < lstCarrito.get(i).getLstItemCarrito().size()) {
+				if (lstCarrito.get(j).getLstItemCarrito().get(j).getArticulo().equals(articulo)) {
+					item.add(new ItemCarrito(articulo, lstCarrito.get(i).getLstItemCarrito().get(j).getCantidad()));
+				}
+				j++;
+			}
+			i++;
+		}
+		return item;
+	}
+
 	public List<Turno> generarTurnosLibres(LocalDate fecha) {
 		DiaRetiro diaRetiro = traerDiaRetiro(fecha);
 		List<Turno> turno = new ArrayList<Turno>();
@@ -268,40 +296,51 @@ public class Comercio extends Actor {
 		return esValido;
 	}
 
-	public Articulo traerArticulo(Articulo articulo) {
-		Articulo art = null;
-		boolean encontrado = false;
+	public Articulo traerArticulo(String nombre) {
+		Articulo articulo = null;
 		int i = 0;
+		boolean encontrado = false;
 		while (i < lstArticulo.size() && encontrado == false) {
-			if (lstCarrito.get(i).getLstItemCarrito().get(i).getArticulo().equals(articulo)) {
-				art = lstCarrito.get(i).getLstItemCarrito().get(i + 1).getArticulo();
+			if (lstArticulo.get(i).getNombre().equals(nombre)) {
+				articulo = lstArticulo.get(i);
 				encontrado = true;
 			}
 			i++;
 		}
-		return art;
+
+		return articulo;
 	}
 
-	public List<ItemCarrito> traerListaCarrito(int id) {
-		List<ItemCarrito> itemCarrito = new ArrayList<ItemCarrito>();
-		boolean encontrado = false;
-		int i = 0;
-		while (i < lstCarrito.get(i).getLstItemCarrito().size() && encontrado == false) {
-			if (lstCarrito.get(i).getId() == id) {
-				itemCarrito = lstCarrito.get(i).getLstItemCarrito();
-				encontrado = true;
-			}
-			i++;
+	public boolean agregarArticulo(String nombre, String codBarras, double precio) {
+		boolean agregado = false;
+		if (traerArticulo(nombre) != null) {
+			agregado = false;
+		} else {
+			lstArticulo.add(new Articulo(traerIdArticulo() + 1, nombre, codBarras, precio));
+			agregado = true;
 		}
-		return itemCarrito;
+		return agregado;
+	}
+
+	public boolean agregarCarrito(LocalDate fecha, LocalTime hora, boolean cerrado, double descuento, Cliente cliente,
+			List<ItemCarrito> lstItemCarrito, Entrega entrega) {
+		boolean agregado = false;
+		if (traerCarrito(fecha) != null) {
+			agregado = false;
+		} else {
+			lstCarrito.add(
+					new Carrito(traerIdCarrito() + 1, fecha, hora, cerrado, descuento, cliente, lstItemCarrito, null));
+			agregado = true;
+		}
+		return agregado;
 	}
 
 	public boolean agregar(Articulo articulo, int cantidad) {
+		int i = 0;
 		boolean agregado = false;
-		if (traerArticulo(articulo) != null) {
+		if (traerItemCarrito(articulo).isEmpty() == false) {
 			agregado = false;
 		} else {
-			int i = 0;
 			while (i < lstCarrito.size() && agregado == false) {
 				lstCarrito.get(i).getLstItemCarrito().add(new ItemCarrito(articulo, cantidad));
 				agregado = true;
@@ -321,6 +360,25 @@ public class Comercio extends Actor {
 		int i = 0;
 		while (i < lstArticulo.size() && encontrado == false) {
 			actual = lstArticulo.get(i).getId();
+			if (actual > mayor) {
+				mayor = actual;
+				encontrado = true;
+			}
+			i++;
+		}
+		return mayor;
+	}
+
+	public int traerIdCarrito() {
+		int mayor = 0;
+		if (lstCarrito.size() != 0) {
+			mayor = lstCarrito.get(0).getId();
+		}
+		int actual;
+		boolean encontrado = false;
+		int i = 0;
+		while (i < lstCarrito.size() && encontrado == false) {
+			actual = lstCarrito.get(i).getId();
 			if (actual > mayor) {
 				mayor = actual;
 				encontrado = true;

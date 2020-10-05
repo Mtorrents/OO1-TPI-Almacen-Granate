@@ -46,4 +46,9 @@ public class Articulo {
 		this.precio = precio;
 	}
 
+	@Override
+	public String toString() {
+		return "Articulo [id=" + id + ", nombre=" + nombre + ", codBarras=" + codBarras + ", precio=" + precio + "]";
+	}
+
 }

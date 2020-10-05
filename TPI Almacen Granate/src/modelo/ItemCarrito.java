@@ -27,4 +27,9 @@ public class ItemCarrito {
 		this.cantidad = cantidad;
 	}
 
+	@Override
+	public String toString() {
+		return "ItemCarrito [articulo=" + articulo + ", cantidad=" + cantidad + "]";
+	}
+
 }
