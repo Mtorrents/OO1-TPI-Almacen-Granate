@@ -16,7 +16,7 @@ public class Carrito {
 	private Entrega entrega;
 
 	public Carrito(int id, LocalDate fecha, LocalTime hora, boolean cerrado, double descuento, Cliente cliente,
-			List<ItemCarrito> lstItemCarrito, Entrega entrega) {
+			Entrega entrega) {
 		super();
 		this.id = id;
 		this.fecha = fecha;
@@ -24,7 +24,6 @@ public class Carrito {
 		this.cerrado = cerrado;
 		this.descuento = descuento;
 		this.cliente = cliente;
-		this.lstItemCarrito = lstItemCarrito;
 		this.entrega = entrega;
 	}
 

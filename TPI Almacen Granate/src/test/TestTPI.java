@@ -17,8 +17,8 @@ public class TestTPI {
 		Cliente c1 = new Cliente(1, cn1, "Torrents", "Martin", 39642511, 'M');
 		Comercio comercio1 = new Comercio(1, cn1, "Almacen Granate", 20328304334l, 24.0, 12.0, 7, 20, 30);
 		Articulo articulo1 = new Articulo(1, "Papas", "123456789041", 12.0);
-		Carrito carrito1 = new Carrito(1, LocalDate.now(), LocalTime.now(), false, 20.0, c1,
-				comercio1.traerItemCarrito(articulo1), null);
+		Articulo articulo2 = new Articulo(2, "Carne", "123456789041", 12.0);
+		Carrito carrito1 = new Carrito(1, LocalDate.now(), LocalTime.now(), false, 20.0, c1, null);
 		LocalTime horaDesde1 = LocalTime.of(9, 00, 00);
 		LocalTime horaHasta1 = LocalTime.of(22, 00, 00);
 		LocalTime horaDesde2 = LocalTime.of(9, 30, 00);
@@ -54,10 +54,17 @@ public class TestTPI {
 		System.out.println(comercio1.agregarArticulo("Papas", "123456789041", 12.0));
 		System.out.println("**************************");
 		System.out.println("Agrego carritos: ");
-		System.out.println(comercio1.agregarCarrito(LocalDate.now(), LocalTime.now(), true, 20.0, c1,
-				carrito1.getLstItemCarrito(), null));
+		System.out.println(comercio1.agregarCarrito(LocalDate.now(), LocalTime.now(), true, 20.0, c1, null));
 		System.out.println("**************************");
 		System.out.println("Agrego items carrito: ");
 		System.out.println(comercio1.agregar(articulo1, 30));
+		System.out.println(comercio1.agregar(articulo2, 40));
+		System.out.println("**************************");
+		System.out.println("Calcular subtotal item: ");
+		System.out.println(comercio1.traerItemCarrito(articulo1).calcularSubTotalItem());
+		System.out.println(comercio1.traerItemCarrito(articulo2).calcularSubTotalItem());
+		System.out.println("**************************");
+		System.out.println("Calcular total carrito: ");
+		System.out.println(comercio1.calcularTotalCarrito());
 	}
 }

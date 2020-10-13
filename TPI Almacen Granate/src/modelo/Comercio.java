@@ -210,14 +210,14 @@ public class Comercio extends Actor {
 		return carrito;
 	}
 
-	public List<ItemCarrito> traerItemCarrito(Articulo articulo) {
-		List<ItemCarrito> item = new ArrayList<ItemCarrito>();
+	public ItemCarrito traerItemCarrito(Articulo articulo) {
+		ItemCarrito item = null;
 		int i = 0;
 		int j = 0;
 		while (i < lstCarrito.size()) {
 			while (j < lstCarrito.get(i).getLstItemCarrito().size()) {
-				if (lstCarrito.get(j).getLstItemCarrito().get(j).getArticulo().equals(articulo)) {
-					item.add(new ItemCarrito(articulo, lstCarrito.get(i).getLstItemCarrito().get(j).getCantidad()));
+				if (lstCarrito.get(i).getLstItemCarrito().get(j).getArticulo().equals(articulo)) {
+					item = lstCarrito.get(i).getLstItemCarrito().get(j);
 				}
 				j++;
 			}
@@ -323,13 +323,12 @@ public class Comercio extends Actor {
 	}
 
 	public boolean agregarCarrito(LocalDate fecha, LocalTime hora, boolean cerrado, double descuento, Cliente cliente,
-			List<ItemCarrito> lstItemCarrito, Entrega entrega) {
+			Entrega entrega) {
 		boolean agregado = false;
 		if (traerCarrito(fecha) != null) {
 			agregado = false;
 		} else {
-			lstCarrito.add(
-					new Carrito(traerIdCarrito() + 1, fecha, hora, cerrado, descuento, cliente, lstItemCarrito, null));
+			lstCarrito.add(new Carrito(traerIdCarrito() + 1, fecha, hora, cerrado, descuento, cliente, null));
 			agregado = true;
 		}
 		return agregado;
@@ -338,7 +337,7 @@ public class Comercio extends Actor {
 	public boolean agregar(Articulo articulo, int cantidad) {
 		int i = 0;
 		boolean agregado = false;
-		if (traerItemCarrito(articulo).isEmpty() == false) {
+		if (traerItemCarrito(articulo) != null) {
 			agregado = false;
 		} else {
 			while (i < lstCarrito.size() && agregado == false) {
@@ -386,6 +385,20 @@ public class Comercio extends Actor {
 			i++;
 		}
 		return mayor;
+	}
+
+	public double calcularTotalCarrito() {
+		double total = 0;
+		int i = 0;
+		int j = 0;
+		while (i < lstCarrito.size()) {
+			while (j < lstCarrito.get(i).getLstItemCarrito().size()) {
+				total = total + lstCarrito.get(i).getLstItemCarrito().get(j).calcularSubTotalItem();
+				j++;
+			}
+			i++;
+		}
+		return total;
 	}
 
 }
