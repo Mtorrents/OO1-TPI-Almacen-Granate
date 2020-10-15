@@ -1,8 +1,9 @@
 package modelo;
 
 import java.time.LocalDate;
+import modelo.Ubicacion;
 
-public abstract class Entrega {
+public class Entrega {
 	protected int id;
 	protected LocalDate fecha;
 	protected boolean efectivo;

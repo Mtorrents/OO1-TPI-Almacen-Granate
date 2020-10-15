@@ -50,4 +50,14 @@ public class Envio extends Entrega {
 		this.ubicacion = ubicacion;
 	}
 
+	public Ubicacion traerUbicacion() {
+		return ubicacion;
+	}
+
+	@Override
+	public String toString() {
+		return "Envio [horaHasta=" + horaHasta + ", horaDesde=" + horaDesde + ", costo=" + costo + ", ubicacion="
+				+ ubicacion + "]";
+	}
+
 }

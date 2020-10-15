@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.RetiroLocal;
+import modelo.Entrega;
+import modelo.Ubicacion;
 
 public class Comercio extends Actor {
 	private String nombreComercio;
@@ -107,20 +110,6 @@ public class Comercio extends Actor {
 
 	public void setLstCarrito(List<Carrito> lstCarrito) {
 		this.lstCarrito = lstCarrito;
-	}
-
-	public LocalTime traerHoraRetiro(LocalDate fecha) {
-		LocalTime horaRetiro = null;
-		int i = 0;
-		boolean encontrado = false;
-		while (i < lstDiaRetiro.size() && encontrado == false) {
-			if (lstDiaRetiro.get(i).getDiaSemana() == fecha.getDayOfWeek().getValue()) {
-				horaRetiro = lstDiaRetiro.get(i).getHoraDesde();
-				encontrado = true;
-			}
-			i++;
-		}
-		return horaRetiro;
 	}
 
 	public boolean agregarDiaRetiro(int diaSemana, LocalTime horaDesde, LocalTime horaHasta, int intervalo) {
@@ -338,7 +327,7 @@ public class Comercio extends Actor {
 		int i = 0;
 		boolean agregado = false;
 		if (traerItemCarrito(articulo) != null) {
-			agregado = false;
+			traerItemCarrito(articulo).setCantidad(traerItemCarrito(articulo).getCantidad() + cantidad);
 		} else {
 			while (i < lstCarrito.size() && agregado == false) {
 				lstCarrito.get(i).getLstItemCarrito().add(new ItemCarrito(articulo, cantidad));
@@ -348,6 +337,23 @@ public class Comercio extends Actor {
 		}
 		return agregado;
 	}
+	
+	public boolean eliminarCantidad(Articulo articulo, int cantidad) {
+		boolean eliminado = false;
+		ItemCarrito itemEncontrado = traerItemCarrito(articulo);
+		if(cantidad < itemEncontrado.getCantidad()) {
+			itemEncontrado.setCantidad(itemEncontrado.getCantidad() - cantidad);
+		} else if(cantidad == itemEncontrado.getCantidad()) {
+			int i = 0;
+			while (i < lstCarrito.size()) {
+				lstCarrito.get(i).getLstItemCarrito().remove(itemEncontrado);
+				eliminado = true;
+				i++;
+			}
+		}
+		return eliminado;
+	}
+	
 
 	public int traerIdArticulo() {
 		int mayor = 0;
@@ -401,4 +407,82 @@ public class Comercio extends Actor {
 		return total;
 	}
 
+	public double calcularDescuentoDia(int diaDescuento, double porcentajeDescuentoDia) {
+		double descuento = 0;
+		int i = 0;
+		int j = 0;
+		int cantidad;
+		double desc;
+		double precio;
+		double suma = 0;
+		while (i < lstCarrito.size()) {
+			if (this.diaDescuento == diaDescuento) {
+				while (j < lstCarrito.get(i).getLstItemCarrito().size()) {
+					cantidad = lstCarrito.get(i).getLstItemCarrito().get(j).getCantidad();
+					precio = lstCarrito.get(i).getLstItemCarrito().get(j).getArticulo().getPrecio();
+					if (cantidad > 1) {
+						desc = cantidad / 2;
+						suma = (int) desc;
+						suma = suma * precio * porcentajeDescuentoDia / 100;
+					}
+					descuento = descuento + suma;
+					j++;
+				}
+
+			}
+			i++;
+		}
+		return descuento;
+	}
+
+	public double calcularDescuentoEfectivo(double porcentajeDescuentoEfectivo) {
+		return calcularTotalCarrito() * porcentajeDescuentoEfectivo / 100;
+	}
+
+	public double calcularDescuentoCarrito(int diaDescuento, double porcentajeDescuento,
+			double porcentajeDescuentoEfectivo) {
+		double descuento = 0;
+		if (this.diaDescuento == diaDescuento) {
+			if (porcentajeDescuento > porcentajeDescuentoEfectivo) {
+				descuento = porcentajeDescuento;
+			} else {
+				descuento = porcentajeDescuentoEfectivo;
+			}
+		}
+		return descuento;
+	}
+
+	protected void setDescuento(double descuento) {
+		int i = 0;
+		while (i < lstCarrito.size()) {
+			lstCarrito.get(i).setDescuento(descuento);
+			i++;
+		}
+	}
+
+	public double totalAPagarCarrito(int diaDescuento, double porcentajeDescuento, double porcentajeDescuentoEfectivo) {
+		double total = 0;
+		total = calcularTotalCarrito()
+				- calcularDescuentoCarrito(diaDescuento, porcentajeDescuento, porcentajeDescuentoEfectivo);
+
+		return total;
+	}
+
+	public double setcosto(Ubicacion ubicacion, double costoFijo, double costoPorKm) {
+        double costo=0;
+        costo= (distanciaCoord(ubicacion.getLatitud(),ubicacion.getLongitud(),8,1)*costoPorKm)+costoFijo;
+        return costo;
+    }
+	
+	public double distanciaCoord(double lat1, double lng1, double lat2, double lng2) {
+		double radioTierra = 6371;
+		double dLat = Math.toRadians(lat2 - lat1);
+		double dLng = Math.toRadians(lng2 - lng1);
+		double sindLat = Math.sin(dLat / 2);
+		double sindLng = Math.sin(dLng / 2);
+		double va1 = Math.pow(sindLat, 2)
+				+ Math.pow(sindLng, 2) * Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2));
+		double va2 = 2 * Math.atan2(Math.sqrt(va1), Math.sqrt(1 - va1));
+		return radioTierra * va2;
+	}
 }
