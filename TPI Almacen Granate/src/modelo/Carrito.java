@@ -93,8 +93,14 @@ public class Carrito {
 
 	@Override
 	public String toString() {
+		String entregar;
+		if(this.entrega instanceof Envio) {
+			entregar = ((Envio)this.entrega).toString();
+		}else {
+			entregar = ((RetiroLocal)this.entrega).toString();
+		}
 		return "Carrito [id=" + id + ", fecha=" + fecha + ", hora=" + hora + ", cerrado=" + cerrado + ", descuento="
-				+ descuento + ", cliente=" + cliente + ", lstItemCarrito=" + lstItemCarrito + ", entrega=" + entrega
+				+ descuento + ", cliente=" + cliente + ", lstItemCarrito=" + lstItemCarrito + ", entrega=" + entregar
 				+ "]";
 	}
 

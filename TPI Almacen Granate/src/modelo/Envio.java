@@ -49,7 +49,7 @@ public class Envio extends Entrega {
 	public void setUbicacion(Ubicacion ubicacion) {
 		this.ubicacion = ubicacion;
 	}
-
+	//*********************** punto 17 *******************************
 	public Ubicacion traerUbicacion() {
 		return ubicacion;
 	}

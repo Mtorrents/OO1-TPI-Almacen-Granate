@@ -31,7 +31,7 @@ public class ItemCarrito {
 	public String toString() {
 		return "ItemCarrito [articulo=" + articulo + ", cantidad=" + cantidad + "]";
 	}
-	
+	//*********************** punto 9 *******************************
 	public double calcularSubTotalItem() {
 		double subTotal;
 		subTotal = articulo.getPrecio() * cantidad;

@@ -4,9 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import modelo.RetiroLocal;
-import modelo.Entrega;
-import modelo.Ubicacion;
 
 public class Comercio extends Actor {
 	private String nombreComercio;
@@ -111,16 +108,8 @@ public class Comercio extends Actor {
 	public void setLstCarrito(List<Carrito> lstCarrito) {
 		this.lstCarrito = lstCarrito;
 	}
-
-	public boolean agregarDiaRetiro(int diaSemana, LocalTime horaDesde, LocalTime horaHasta, int intervalo) {
-		if (traerDiaRetiro(diaSemana) != null) {
-			return false;
-		} else {
-			lstDiaRetiro.add(new DiaRetiro(traerIdDiaRetiro() + 1, diaSemana, horaDesde, horaHasta, intervalo));
-			return true;
-		}
-	}
-
+	
+	//*********************** punto 1 *******************************
 	protected boolean validarIdentificadorUnico(long identificador) {
 		boolean esValido = false;
 		if (esValido == false) {
@@ -139,7 +128,176 @@ public class Comercio extends Actor {
 		}
 		return esValido;
 	}
+	// Punto 2 en RetiroLocal
+	//*********************** punto 3 *******************************
+		public List<Turno> generarTurnosLibres(LocalDate fecha) {
+			DiaRetiro diaRetiro = traerDiaRetiro(fecha);
+			List<Turno> turno = new ArrayList<Turno>();
+			if (diaRetiro != null) {
+				LocalTime horaDesde = diaRetiro.getHoraDesde();
+				LocalTime horaHasta = diaRetiro.getHoraHasta();
+				int intervalo = diaRetiro.getIntervalo();
+				while (horaDesde.isBefore(horaHasta)) {
+					turno.add(new Turno(fecha, horaDesde, false));
+					horaDesde = horaDesde.plusMinutes(intervalo);
+				}
+			}
+			return turno;
 
+		}
+		//*********************** punto 4 *******************************
+		public List<Turno> traerTurnosOcupados(LocalDate fecha) {
+			List<Turno> turnosOcupados = new ArrayList<Turno>();
+			for (int i=0; i<this.lstCarrito.size();i++) {
+				if(this.lstCarrito.get(i).getFecha().equals(fecha)) {
+				turnosOcupados.add(new Turno(this.lstCarrito.get(i).getFecha(),this.lstCarrito.get(i).getHora(),true));
+				}
+			}
+			return turnosOcupados;
+		}
+		//*********************** punto 5 *******************************
+		public List<Turno> generarAgenda(LocalDate fecha) {
+			List<Turno> agenda = new ArrayList<Turno>();
+			List<Turno> turnosOcupados = traerTurnosOcupados(fecha);
+			List<Turno> turnosLibres = generarTurnosLibres(fecha);
+			if (!turnosOcupados.isEmpty()) {
+				agenda.addAll(turnosOcupados);
+			} else if (!turnosLibres.isEmpty() && turnosOcupados.isEmpty()) {
+				agenda.addAll(turnosLibres);
+			}
+			return agenda;
+		}
+		//*********************** punto 6 *******************************
+			public boolean agregarDiaRetiro(LocalDate diaSemana, LocalTime horaDesde, LocalTime horaHasta, int intervalo) {
+				if (traerDiaRetiro(diaSemana) != null) {
+					return false;
+				} else {
+					lstDiaRetiro.add(new DiaRetiro(traerIdDiaRetiro() + 1, diaSemana.getDayOfWeek().getValue(), horaDesde, horaHasta, intervalo));
+					return true;
+				}
+			}
+		//*********************** punto 7 *******************************
+		public boolean validarCodBarras(String codBarras) {
+			boolean esValido = false;
+			int i = 0;
+			int chequeoSuma = 0;
+			char[] codBarrasToChar = codBarras.toCharArray();
+			int[] ean = { 1, 3 };
+			int suma = 0;
+			if (codBarrasToChar.length == 12) {
+				while (i < codBarrasToChar.length) {
+					suma = suma + Character.getNumericValue(codBarrasToChar[i]) * ean[i % 2];
+					i++;
+				}
+				chequeoSuma = 10 - suma % 10;
+				if (chequeoSuma == 10) {
+					chequeoSuma = 0;
+					esValido = true;
+				}
+				esValido = true;
+			}
+			return esValido;
+		}
+	//*********************** punto 8 *******************************
+	public boolean agregar(Articulo articulo, int cantidad) {
+		int i = 0;
+		boolean agregado = false;
+		if (traerItemCarrito(articulo) != null) {
+			traerItemCarrito(articulo).setCantidad(traerItemCarrito(articulo).getCantidad() + cantidad);
+		} else {
+			while (i < lstCarrito.size() && agregado == false) {
+				lstCarrito.get(i).getLstItemCarrito().add(new ItemCarrito(articulo, cantidad));
+				agregado = true;
+				i++;
+			}
+		}
+		return agregado;
+	}
+	//punto 9 en ItemCarrito
+	//*********************** punto 10 *******************************
+		public double calcularTotalCarrito() {
+			double total = 0;
+			int i = 0;
+			int j = 0;
+			while (i < lstCarrito.size()) {
+				while (j < lstCarrito.get(i).getLstItemCarrito().size()) {
+					total = total + lstCarrito.get(i).getLstItemCarrito().get(j).calcularSubTotalItem();
+					j++;
+				}
+				i++;
+			}
+			return total;
+		}
+		//*********************** punto 11 *******************************
+		public double calcularDescuentoDia(int diaDescuento, double porcentajeDescuentoDia) {
+			double descuento = 0;
+			int i = 0;
+			int j = 0;
+			int cantidad;
+			double desc;
+			double precio;
+			double suma = 0;
+			while (i < lstCarrito.size()) {
+				if (this.diaDescuento == diaDescuento) {
+					while (j < lstCarrito.get(i).getLstItemCarrito().size()) {
+						cantidad = lstCarrito.get(i).getLstItemCarrito().get(j).getCantidad();
+						precio = lstCarrito.get(i).getLstItemCarrito().get(j).getArticulo().getPrecio();
+						if (cantidad > 1) {
+							desc = cantidad / 2;
+							suma = (int) desc;
+							suma = suma * precio * porcentajeDescuentoDia / 100;
+						}
+						descuento = descuento + suma;
+						j++;
+					}
+
+				}
+				i++;
+			}
+			return descuento;
+		}
+		//*********************** punto 12 *******************************
+		public double calcularDescuentoEfectivo(double porcentajeDescuentoEfectivo) {
+			return calcularTotalCarrito() * porcentajeDescuentoEfectivo / 100;
+		}
+		//*********************** punto 13 *******************************
+		public double calcularDescuentoCarrito(int diaDescuento, double porcentajeDescuento,
+				double porcentajeDescuentoEfectivo) {
+			double descuento = 0;
+			if (this.diaDescuento == diaDescuento) {
+				if (porcentajeDescuento > porcentajeDescuentoEfectivo) {
+					descuento = porcentajeDescuento;
+				} else {
+					descuento = porcentajeDescuentoEfectivo;
+				}
+			}
+			return descuento;
+		}
+		//*********************** punto 14 *******************************
+		protected void setDescuento(double descuento) {
+			int i = 0;
+			while (i < lstCarrito.size()) {
+				lstCarrito.get(i).setDescuento(descuento);
+				i++;
+			}
+		}
+		//*********************** punto 15 *******************************
+		public double totalAPagarCarrito(int diaDescuento, double porcentajeDescuento, double porcentajeDescuentoEfectivo) {
+			double total = 0;
+			total = calcularTotalCarrito()
+					- calcularDescuentoCarrito(diaDescuento, porcentajeDescuento, porcentajeDescuentoEfectivo);
+
+			return total;
+		}
+		//*********************** punto 16 *******************************
+		public double setcosto(Ubicacion ubicacion, double costoFijo, double costoPorKm) {
+	        double costo=0;
+	        costo= (distanciaCoord(ubicacion.getLatitud(),ubicacion.getLongitud(),84,72)*costoPorKm)+costoFijo;
+	        return costo;
+	    }
+		//punto 17 en Envio
+		
+		// Funciones Auxiliares
 	public int traerIdDiaRetiro() {
 		int mayor = 0;
 		if (lstDiaRetiro.size() != 0) {
@@ -157,20 +315,6 @@ public class Comercio extends Actor {
 			i++;
 		}
 		return mayor;
-	}
-
-	public DiaRetiro traerDiaRetiro(int diaSemana) {
-		DiaRetiro diaRetiro = null;
-		boolean encontrado = false;
-		int i = 0;
-		while (i < lstDiaRetiro.size() && encontrado == false) {
-			if (lstDiaRetiro.get(i).getDiaSemana() == diaSemana) {
-				diaRetiro = lstDiaRetiro.get(i);
-				encontrado = true;
-			}
-			i++;
-		}
-		return diaRetiro;
 	}
 
 	public DiaRetiro traerDiaRetiro(LocalDate fecha) {
@@ -193,8 +337,8 @@ public class Comercio extends Actor {
 		while (i < lstCarrito.size()) {
 			if (lstCarrito.get(i).getFecha().equals(fecha)) {
 				carrito = lstCarrito.get(i);
-				i++;
-			}
+				}
+			i++;
 		}
 		return carrito;
 	}
@@ -214,77 +358,22 @@ public class Comercio extends Actor {
 		}
 		return item;
 	}
-
-	public List<Turno> generarTurnosLibres(LocalDate fecha) {
-		DiaRetiro diaRetiro = traerDiaRetiro(fecha);
-		List<Turno> turno = new ArrayList<Turno>();
-		if (diaRetiro != null) {
-			LocalTime horaDesde = diaRetiro.getHoraDesde();
-			LocalTime horaHasta = diaRetiro.getHoraHasta();
-			int intervalo = diaRetiro.getIntervalo();
-			while (horaDesde.isBefore(horaHasta)) {
-				turno.add(new Turno(fecha, horaDesde, false));
-				horaDesde = horaDesde.plusMinutes(intervalo);
-			}
-		}
-		return turno;
-
-	}
-
-	public List<Turno> traerTurnosOcupados(LocalDate fecha) {
-		DiaRetiro diaRetiro = traerDiaRetiro(fecha);
-		List<Turno> turnosOcupados = new ArrayList<Turno>();
-		List<Turno> turnosLibres = generarTurnosLibres(fecha);
+	
+public boolean eliminarCantidad(Articulo articulo, int cantidad) {
+	boolean eliminado = false;
+	ItemCarrito itemEncontrado = traerItemCarrito(articulo);
+	if(cantidad < itemEncontrado.getCantidad()) {
+		itemEncontrado.setCantidad(itemEncontrado.getCantidad() - cantidad);
+	} else if(cantidad == itemEncontrado.getCantidad()) {
 		int i = 0;
-		if (!turnosLibres.isEmpty()) {
-			LocalTime horaDesde = diaRetiro.getHoraDesde();
-			LocalTime horaHasta = diaRetiro.getHoraHasta();
-			int intervalo = diaRetiro.getIntervalo();
-			while (horaDesde.isBefore(horaHasta)) {
-				if (turnosLibres.get(i).getDia().equals(fecha)) {
-					turnosOcupados.add(new Turno(fecha, horaDesde, true));
-					horaDesde = horaDesde.plusMinutes(intervalo);
-				}
-				i++;
-			}
+		while (i < lstCarrito.size()) {
+			lstCarrito.get(i).getLstItemCarrito().remove(itemEncontrado);
+			eliminado = true;
+			i++;
 		}
-		return turnosOcupados;
 	}
-
-	public List<Turno> generarAgenda(LocalDate fecha) {
-		List<Turno> agenda = new ArrayList<Turno>();
-		List<Turno> turnosOcupados = traerTurnosOcupados(fecha);
-		List<Turno> turnosLibres = generarTurnosLibres(fecha);
-		if (!turnosOcupados.isEmpty()) {
-			agenda.addAll(turnosOcupados);
-		} else if (!turnosLibres.isEmpty() && turnosOcupados.isEmpty()) {
-			agenda.addAll(turnosLibres);
-		}
-		return agenda;
-	}
-
-	public boolean validarCodBarras(String codBarras) {
-		boolean esValido = false;
-		int i = 0;
-		int chequeoSuma = 0;
-		char[] codBarrasToChar = codBarras.toCharArray();
-		int[] ean = { 1, 3 };
-		int suma = 0;
-		if (codBarrasToChar.length == 12) {
-			while (i < codBarrasToChar.length) {
-				suma = suma + Character.getNumericValue(codBarrasToChar[i]) * ean[i % 2];
-				i++;
-			}
-			chequeoSuma = 10 - suma % 10;
-			if (chequeoSuma == 10) {
-				chequeoSuma = 0;
-				esValido = true;
-			}
-			esValido = true;
-		}
-		return esValido;
-	}
-
+	return eliminado;
+}
 	public Articulo traerArticulo(String nombre) {
 		Articulo articulo = null;
 		int i = 0;
@@ -311,50 +400,13 @@ public class Comercio extends Actor {
 		return agregado;
 	}
 
-	public boolean agregarCarrito(LocalDate fecha, LocalTime hora, boolean cerrado, double descuento, Cliente cliente,
-			Entrega entrega) {
-		boolean agregado = false;
+	public boolean agregarCarrito(LocalDate fecha, LocalTime hora, boolean cerrado, double descuento, Cliente cliente, Entrega entrega) {
 		if (traerCarrito(fecha) != null) {
-			agregado = false;
-		} else {
-			lstCarrito.add(new Carrito(traerIdCarrito() + 1, fecha, hora, cerrado, descuento, cliente, null));
-			agregado = true;
+			return false;
 		}
-		return agregado;
-	}
-
-	public boolean agregar(Articulo articulo, int cantidad) {
-		int i = 0;
-		boolean agregado = false;
-		if (traerItemCarrito(articulo) != null) {
-			traerItemCarrito(articulo).setCantidad(traerItemCarrito(articulo).getCantidad() + cantidad);
-		} else {
-			while (i < lstCarrito.size() && agregado == false) {
-				lstCarrito.get(i).getLstItemCarrito().add(new ItemCarrito(articulo, cantidad));
-				agregado = true;
-				i++;
-			}
-		}
-		return agregado;
+		return lstCarrito.add(new Carrito(traerIdCarrito() + 1, fecha, hora, cerrado, descuento, cliente, entrega));
 	}
 	
-	public boolean eliminarCantidad(Articulo articulo, int cantidad) {
-		boolean eliminado = false;
-		ItemCarrito itemEncontrado = traerItemCarrito(articulo);
-		if(cantidad < itemEncontrado.getCantidad()) {
-			itemEncontrado.setCantidad(itemEncontrado.getCantidad() - cantidad);
-		} else if(cantidad == itemEncontrado.getCantidad()) {
-			int i = 0;
-			while (i < lstCarrito.size()) {
-				lstCarrito.get(i).getLstItemCarrito().remove(itemEncontrado);
-				eliminado = true;
-				i++;
-			}
-		}
-		return eliminado;
-	}
-	
-
 	public int traerIdArticulo() {
 		int mayor = 0;
 		if (lstArticulo.size() != 0) {
@@ -392,87 +444,6 @@ public class Comercio extends Actor {
 		}
 		return mayor;
 	}
-
-	public double calcularTotalCarrito() {
-		double total = 0;
-		int i = 0;
-		int j = 0;
-		while (i < lstCarrito.size()) {
-			while (j < lstCarrito.get(i).getLstItemCarrito().size()) {
-				total = total + lstCarrito.get(i).getLstItemCarrito().get(j).calcularSubTotalItem();
-				j++;
-			}
-			i++;
-		}
-		return total;
-	}
-
-	public double calcularDescuentoDia(int diaDescuento, double porcentajeDescuentoDia) {
-		double descuento = 0;
-		int i = 0;
-		int j = 0;
-		int cantidad;
-		double desc;
-		double precio;
-		double suma = 0;
-		while (i < lstCarrito.size()) {
-			if (this.diaDescuento == diaDescuento) {
-				while (j < lstCarrito.get(i).getLstItemCarrito().size()) {
-					cantidad = lstCarrito.get(i).getLstItemCarrito().get(j).getCantidad();
-					precio = lstCarrito.get(i).getLstItemCarrito().get(j).getArticulo().getPrecio();
-					if (cantidad > 1) {
-						desc = cantidad / 2;
-						suma = (int) desc;
-						suma = suma * precio * porcentajeDescuentoDia / 100;
-					}
-					descuento = descuento + suma;
-					j++;
-				}
-
-			}
-			i++;
-		}
-		return descuento;
-	}
-
-	public double calcularDescuentoEfectivo(double porcentajeDescuentoEfectivo) {
-		return calcularTotalCarrito() * porcentajeDescuentoEfectivo / 100;
-	}
-
-	public double calcularDescuentoCarrito(int diaDescuento, double porcentajeDescuento,
-			double porcentajeDescuentoEfectivo) {
-		double descuento = 0;
-		if (this.diaDescuento == diaDescuento) {
-			if (porcentajeDescuento > porcentajeDescuentoEfectivo) {
-				descuento = porcentajeDescuento;
-			} else {
-				descuento = porcentajeDescuentoEfectivo;
-			}
-		}
-		return descuento;
-	}
-
-	protected void setDescuento(double descuento) {
-		int i = 0;
-		while (i < lstCarrito.size()) {
-			lstCarrito.get(i).setDescuento(descuento);
-			i++;
-		}
-	}
-
-	public double totalAPagarCarrito(int diaDescuento, double porcentajeDescuento, double porcentajeDescuentoEfectivo) {
-		double total = 0;
-		total = calcularTotalCarrito()
-				- calcularDescuentoCarrito(diaDescuento, porcentajeDescuento, porcentajeDescuentoEfectivo);
-
-		return total;
-	}
-
-	public double setcosto(Ubicacion ubicacion, double costoFijo, double costoPorKm) {
-        double costo=0;
-        costo= (distanciaCoord(ubicacion.getLatitud(),ubicacion.getLongitud(),8,1)*costoPorKm)+costoFijo;
-        return costo;
-    }
 	
 	public double distanciaCoord(double lat1, double lng1, double lat2, double lng2) {
 		double radioTierra = 6371;
