@@ -1,6 +1,6 @@
-# OO1-TPI-Almacen-Granate
-repositorio para el trabajo practico de la materia Objetos 1
+# OO1-TPI-Warehouse-Granate
+repository for practical work on the subject Objects 1
 
-Nota importante: avisar cuando se vaya a subir una nueva version asi tenemos un backup
+Important note: notify when a new version is going to be uploaded so we have a backup
 
-Colaboradores: Walter Gazzaneggo, Mariano Augusto Ribe, Martin Alexis Torrents y German Pinto
+Collaborators: Walter Gazzaneggo, Mariano Augusto Ribe, Martin Alexis Torrents and German Pinto
